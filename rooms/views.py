@@ -18,15 +18,13 @@ class RoomsView(APIView):
     def post(self, request):
         if not request.user.is_authenticated:
             return Response(status=401)
-
         serializer = WriteRoomSerializer(data=request.data)
-        # print(dir(serializer))
         if serializer.is_valid():
             room = serializer.save(user=request.user)
             room_serializer = ReadRoomSerializer(room).data
             return Response(data=room_serializer,status=200)
         else:
-            print(serializer.errors)
+            # print(serializer.errors)
             return Response(data=serializer.errors, status=400) 
         
 
@@ -63,11 +61,23 @@ class RoomView(APIView):
 
 
     def put(self, request, pk):
-       pass
+        room = self.get_room(pk)
+        if room is not None:
+            if room.user != request.user:
+                return Response(status=403)
+            serializer = WriteRoomSerializer(room, data=request.data, partial=True)
+            if serializer.is_valid():
+                room = serializer.save()
+                return Response(ReadRoomSerializer(room).data)
+            else:
+                return Response(serializer.errors,  status=400)
+            return Response()
+        else:
+            return Response(status=404)
 
     def delete(self, request, pk):
         room = self.get_room(pk)
-        if room.user != request.user:
+        if room.user != request.user :
             return Response(status=403)
         if room is not None:
             room.delete()
