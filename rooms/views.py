@@ -3,7 +3,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.decorators import api_view
 from .models import Room
-from .serializers import ReadRoomSerializer, WriteRoomSerializer
+from .serializers import  RoomSerializer
 
 
 
@@ -18,10 +18,10 @@ class RoomsView(APIView):
     def post(self, request):
         if not request.user.is_authenticated:
             return Response(status=401)
-        serializer = WriteRoomSerializer(data=request.data)
+        serializer = RoomSerializer(data=request.data)
         if serializer.is_valid():
             room = serializer.save(user=request.user)
-            room_serializer = ReadRoomSerializer(room).data
+            room_serializer = RoomSerializer(room).data
             return Response(data=room_serializer,status=200)
         else:
             # print(serializer.errors)
@@ -53,7 +53,7 @@ class RoomView(APIView):
     def get(self, request, pk):
         room = self.get_room(pk)
         if room is not None:
-            serializer = ReadRoomSerializer(room).data
+            serializer = RoomSerializer(room).data
             return Response(data=serializer, status=200)
         else:
             return Response(status=404)
@@ -65,7 +65,7 @@ class RoomView(APIView):
         if room is not None:
             if room.user != request.user:
                 return Response(status=403)
-            serializer = WriteRoomSerializer(room, data=request.data, partial=True)
+            serializer = RoomSerializer(room, data=request.data, partial=True)
             if serializer.is_valid():
                 room = serializer.save()
                 return Response(ReadRoomSerializer(room).data)
