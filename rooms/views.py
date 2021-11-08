@@ -11,7 +11,7 @@ class RoomsView(APIView):
 
     def get(self, request): 
         rooms = Room.objects.all()[:5]
-        serializer = ReadRoomSerializer(rooms, many=True).data
+        serializer = RoomSerializer(rooms, many=True).data
         return Response(serializer)
 
 
